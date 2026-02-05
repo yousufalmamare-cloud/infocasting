@@ -3,952 +3,1618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InfoCast - Internal Storage Broadcast System</title>
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="InfoCast - Complete Internal Storage Broadcast System">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📢</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📢</text></svg>">
+    
+    <title>InfoCast Web App</title>
+    
+    <!-- Inline PWA Manifest -->
+    <script id="manifest" type="application/json">
+    {
+        "name": "InfoCast Broadcast System",
+        "short_name": "InfoCast",
+        "description": "Complete internal storage broadcast system",
+        "start_url": ".",
+        "display": "standalone",
+        "background_color": "#2563eb",
+        "theme_color": "#2563eb",
+        "icons": [
+            {
+                "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%232563eb'/><text x='50' y='65' text-anchor='middle' font-size='40' fill='white'>📢</text></svg>",
+                "sizes": "192x192",
+                "type": "image/svg+xml"
+            }
+        ]
+    }
+    </script>
+    
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #3b82f6;
-            --danger-color: #ef4444;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --dark-color: #1f2937;
-            --light-color: #f9fafb;
-        }
-        
+        /* Reset & Base */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+        }
+        
+        html {
+            height: 100%;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
-            color: var(--dark-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        /* App Container */
+        .app-container {
+            max-width: 100%;
+            min-height: 100vh;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            position: relative;
+            overflow-x: hidden;
         }
         
-        header {
-            background: var(--dark-color);
+        /* App Header */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--dark);
             color: white;
-            padding: 25px 40px;
+            padding: 1rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .logo {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 0.75rem;
         }
         
-        .logo h1 {
-            font-size: 28px;
+        .logo-icon {
+            font-size: 1.5rem;
+            background: var(--primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
             background: linear-gradient(90deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
         
-        .storage-status {
+        .logo-text span {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+        
+        .app-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-size: 14px;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         
-        .storage-bar {
-            width: 200px;
-            height: 10px;
-            background: #374151;
-            border-radius: 5px;
-            overflow: hidden;
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.2);
         }
         
-        .storage-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success-color), var(--primary-color));
-            width: 0%;
-            transition: width 0.5s;
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            padding: 0.5rem;
+            gap: 0.5rem;
+            z-index: 100;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
         }
         
-        .main-content {
-            display: grid;
-            grid-template-columns: 350px 1fr 300px;
-            min-height: 700px;
-        }
-        
-        .sidebar {
-            background: #f8fafc;
-            border-right: 1px solid #e5e7eb;
-            padding: 25px;
-        }
-        
-        .broadcast-controls {
-            margin-bottom: 30px;
-        }
-        
-        .control-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #4b5563;
-        }
-        
-        select, input, textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e5e7eb;
+        .nav-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
             border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--gray);
         }
         
-        select:focus, input:focus, textarea:focus {
+        .nav-btn.active {
+            background: var(--light);
+            color: var(--primary);
+        }
+        
+        .nav-btn i {
+            font-size: 1.25rem;
+        }
+        
+        .nav-btn span {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 1rem;
+            padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        
+        /* Section Styles */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .section-header p {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+        
+        /* Home Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--gray-light);
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+        }
+        
+        .stat-icon.primary { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+        .stat-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .stat-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .stat-icon.danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        
+        .stat-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-card p {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        .quick-actions {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: var(--primary);
+            color: white;
+        }
+        
+        .action-content h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .action-content p {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        /* Create Section */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         
-        textarea {
+        .form-textarea {
             min-height: 120px;
             resize: vertical;
+        }
+        
+        .char-count {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
         }
         
         .urgency-options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 10px;
+            gap: 0.5rem;
         }
         
         .urgency-btn {
-            padding: 10px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
+            padding: 0.75rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
             background: white;
-            cursor: pointer;
             text-align: center;
-            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
             font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .urgency-btn:hover {
-            transform: translateY(-2px);
         }
         
         .urgency-btn.active {
             border-color: currentColor;
         }
         
-        .low { color: var(--success-color); }
-        .medium { color: var(--warning-color); }
-        .high { color: var(--danger-color); }
+        .urgency-btn.low { color: var(--success); }
+        .urgency-btn.medium { color: var(--warning); }
+        .urgency-btn.high { color: var(--danger); }
+        
+        .tag-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .tag {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .tag-remove {
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        
+        .form-actions {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
         
         .btn {
-            padding: 14px 25px;
+            padding: 1rem;
             border: none;
             border-radius: 10px;
             font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 16px;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 0.5rem;
         }
         
         .btn-primary {
-            background: var(--primary-color);
+            background: var(--primary);
             color: white;
-            width: 100%;
         }
         
         .btn-primary:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
         }
         
         .btn-secondary {
-            background: #6b7280;
-            color: white;
-            width: 100%;
-            margin-top: 10px;
+            background: var(--gray-light);
+            color: var(--dark);
         }
         
         .btn-danger {
-            background: var(--danger-color);
+            background: var(--danger);
             color: white;
-            margin-top: 10px;
         }
         
-        .broadcast-display {
-            padding: 30px;
-            background: white;
-            position: relative;
-        }
-        
-        .display-header {
+        /* Broadcasts Section */
+        .filter-bar {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f3f4f6;
-        }
-        
-        .display-header h2 {
-            color: #111827;
-            font-size: 24px;
-        }
-        
-        .filter-controls {
-            display: flex;
-            gap: 10px;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
         }
         
         .filter-btn {
-            background: #f3f4f6;
-            color: #6b7280;
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 20px;
+            background: white;
+            color: var(--gray);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
         }
         
         .filter-btn.active {
-            background: var(--primary-color);
+            background: var(--primary);
             color: white;
+            border-color: var(--primary);
         }
         
-        .broadcast-container {
-            display: grid;
-            gap: 20px;
-            max-height: 550px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-        
-        .broadcast-item {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            border-left: 6px solid var(--primary-color);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            animation: slideIn 0.5s ease-out;
-            transition: all 0.3s;
+        .search-bar {
             position: relative;
+            margin-bottom: 1rem;
         }
         
-        .broadcast-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        .search-input {
+            padding-left: 2.5rem;
+            width: 100%;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
+        .broadcasts-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .broadcast-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+        }
+        
+        .broadcast-card.urgent {
+            animation: pulse 1s ease 3;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
         }
         
         .broadcast-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
+            margin-bottom: 0.75rem;
         }
         
         .broadcast-title {
-            font-size: 18px;
             font-weight: 700;
-            color: #111827;
+            font-size: 1rem;
             flex: 1;
         }
         
-        .broadcast-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            background: #f3f4f6;
-            color: #6b7280;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-        
-        .action-btn:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-        
-        .broadcast-urgency {
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 12px;
+        .broadcast-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
-            margin-top: 10px;
-            display: inline-block;
         }
         
-        .broadcast-content {
-            color: #6b7280;
-            line-height: 1.6;
-            margin: 15px 0;
-            padding: 15px;
-            background: #f9fafb;
+        .broadcast-badge.high { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .broadcast-badge.medium { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .broadcast-badge.low { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        
+        .broadcast-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin: 0.5rem 0;
+        }
+        
+        .broadcast-tag {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            padding: 0.125rem 0.5rem;
             border-radius: 10px;
-            white-space: pre-wrap;
+            font-size: 0.75rem;
+        }
+        
+        .broadcast-message {
+            color: var(--gray);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         
         .broadcast-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
-            color: #9ca3af;
+            font-size: 0.75rem;
+            color: var(--gray);
         }
         
         .broadcast-type {
-            background: #f3f4f6;
-            padding: 4px 12px;
-            border-radius: 15px;
+            background: var(--light);
+            padding: 0.25rem 0.5rem;
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 0.25rem;
         }
         
-        .broadcast-time {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray);
         }
         
-        .storage-panel {
-            background: #f8fafc;
-            border-left: 1px solid #e5e7eb;
-            padding: 25px;
-            overflow-y: auto;
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
         }
         
+        /* Storage Section */
         .storage-info {
-            margin-bottom: 30px;
-            padding: 20px;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .storage-bar {
+            height: 8px;
+            background: var(--gray-light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .storage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--primary));
+            width: 0%;
+            transition: width 0.5s;
         }
         
         .storage-stats {
             display: grid;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
         
-        .stat-item {
+        .storage-stat {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            background: #f9fafb;
-            border-radius: 8px;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: #6b7280;
-        }
-        
-        .stat-value {
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--dark-color);
-        }
-        
-        .backup-controls {
-            margin: 30px 0;
-            padding: 20px;
+            padding: 1rem;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            border: 1px solid var(--gray-light);
         }
         
-        .backup-controls h4 {
-            margin-bottom: 15px;
-            color: var(--dark-color);
-        }
-        
-        .backup-options {
+        .storage-actions {
             display: grid;
-            gap: 10px;
+            gap: 0.75rem;
+        }
+        
+        .export-history {
+            margin-top: 2rem;
         }
         
         .export-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            background: #f9fafb;
-            border-radius: 8px;
-            margin-bottom: 5px;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--gray-light);
         }
         
-        .export-name {
-            font-size: 14px;
+        /* Settings Section */
+        .settings-group {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            border: 1px solid var(--gray-light);
+        }
+        
+        .settings-header {
+            padding: 1rem;
+            background: var(--light);
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
-        .export-date {
-            font-size: 12px;
-            color: #6b7280;
+        .settings-content {
+            padding: 1rem;
         }
         
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #9ca3af;
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--gray-light);
         }
         
-        .empty-state i {
-            font-size: 60px;
-            margin-bottom: 20px;
-            opacity: 0.5;
+        .setting-item:last-child {
+            border-bottom: none;
         }
         
-        @keyframes slideIn {
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray-light);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+        
+        @keyframes modalIn {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
-        .urgent-flash {
-            animation: flash 1s ease-in-out 3;
-        }
-        
-        @keyframes flash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        .new-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: var(--danger-color);
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 700;
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        .tag-list {
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 10px 0;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .tag {
-            background: #e0f2fe;
-            color: var(--primary-color);
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 600;
+        .modal-body {
+            padding: 1.5rem;
         }
         
-        /* Search Bar */
-        .search-bar {
-            margin-bottom: 20px;
-            position: relative;
+        .modal-actions {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            gap: 0.75rem;
         }
         
-        .search-bar input {
-            padding-left: 45px;
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--dark);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: toastIn 0.3s ease;
+            max-width: 300px;
         }
         
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
         }
         
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .main-content {
-                grid-template-columns: 1fr;
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); }
+        
+        /* Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 5rem;
+            left: 1rem;
+            right: 1rem;
+            background: var(--dark);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .install-prompt.active {
+            display: flex;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 768px;
+                margin: 0 auto;
+                min-height: 100vh;
+                box-shadow: 0 0 40px rgba(0,0,0,0.1);
             }
             
-            .sidebar, .storage-panel {
-                border-right: none;
-                border-bottom: 1px solid #e5e7eb;
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --dark: #f9fafb;
+                --light: #1f2937;
+                --gray: #9ca3af;
+                --gray-light: #374151;
             }
             
-            .urgency-options {
-                grid-template-columns: 1fr;
+            .app-container {
+                background: #111827;
             }
             
-            .display-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: stretch;
+            .stat-card,
+            .action-card,
+            .broadcast-card,
+            .storage-info,
+            .storage-stat,
+            .export-item,
+            .settings-group {
+                background: #1f2937;
+                border-color: #374151;
+                color: #f9fafb;
             }
             
-            .filter-controls {
-                justify-content: center;
+            .form-input,
+            .form-select,
+            .form-textarea {
+                background: #1f2937;
+                border-color: #374151;
+                color: #f9fafb;
+            }
+            
+            .bottom-nav {
+                background: #1f2937;
+                border-color: #374151;
+            }
+            
+            .nav-btn {
+                color: #9ca3af;
+            }
+            
+            .nav-btn.active {
+                background: #374151;
+                color: #60a5fa;
             }
         }
     </style>
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="app-header">
             <div class="logo">
-                <i class="fas fa-database fa-2x" style="color: #667eea;"></i>
-                <h1>InfoCast - Internal Storage System</h1>
+                <div class="logo-icon">
+                    <i class="fas fa-broadcast-tower"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>InfoCast</h1>
+                    <span id="appStatus">Web App Ready</span>
+                </div>
             </div>
-            <div class="storage-status">
-                <div>
-                    <div style="font-size: 12px; color: #9ca3af;">Local Storage</div>
-                    <div style="font-weight: 600;" id="storageStatus">100% Available</div>
-                </div>
-                <div class="storage-bar">
-                    <div class="storage-fill" id="storageFill"></div>
-                </div>
+            <div class="app-actions">
+                <button class="icon-btn" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="icon-btn" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="icon-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </header>
         
-        <div class="main-content">
-            <!-- Left Sidebar: Create Broadcast -->
-            <div class="sidebar">
-                <div class="broadcast-controls">
-                    <h3 style="margin-bottom: 25px; color: #111827;">
-                        <i class="fas fa-bullhorn"></i> Create New Broadcast
-                    </h3>
-                    
-                    <div class="control-group">
-                        <label for="broadcastTitle">Broadcast Title *</label>
-                        <input type="text" id="broadcastTitle" placeholder="Enter broadcast title..." maxlength="100">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Home Section -->
+            <section id="homeSection" class="section active">
+                <div class="section-header">
+                    <h2>Dashboard</h2>
+                    <p>Manage your broadcasts and view stats</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <h3 id="statTotal">0</h3>
+                        <p>Total Broadcasts</p>
                     </div>
                     
-                    <div class="control-group">
-                        <label for="broadcastType">Broadcast Type</label>
-                        <select id="broadcastType">
-                            <option value="announcement">📢 General Announcement</option>
-                            <option value="alert">⚠️ Emergency Alert</option>
-                            <option value="maintenance">🔧 Maintenance Notice</option>
-                            <option value="update">🔄 System Update</option>
-                            <option value="news">📰 News Bulletin</option>
-                            <option value="meeting">👥 Meeting Announcement</option>
-                            <option value="deadline">⏰ Deadline Reminder</option>
-                            <option value="holiday">🎉 Holiday Notice</option>
-                        </select>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3 id="statActive">0</h3>
+                        <p>Active Now</p>
                     </div>
                     
-                    <div class="control-group">
-                        <label for="broadcastTags">Tags (comma separated)</label>
-                        <input type="text" id="broadcastTags" placeholder="urgent, system, meeting, etc.">
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3 id="statExpired">0</h3>
+                        <p>Expired</p>
                     </div>
                     
-                    <div class="control-group">
-                        <label>Urgency Level</label>
-                        <div class="urgency-options">
-                            <button class="urgency-btn low" data-level="low">
-                                <i class="fas fa-info-circle"></i> Low
-                            </button>
-                            <button class="urgency-btn medium active" data-level="medium">
-                                <i class="fas fa-exclamation-triangle"></i> Medium
-                            </button>
-                            <button class="urgency-btn high" data-level="high">
-                                <i class="fas fa-skull-crossbones"></i> High
-                            </button>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-hdd"></i>
+                        </div>
+                        <h3 id="statStorage">0 KB</h3>
+                        <p>Storage Used</p>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <div class="action-card" onclick="navigateTo('create')">
+                        <div class="action-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="action-content">
+                            <h3>Create Broadcast</h3>
+                            <p>Send a new announcement</p>
                         </div>
                     </div>
                     
-                    <div class="control-group">
-                        <label for="broadcastMessage">Message *</label>
-                        <textarea id="broadcastMessage" placeholder="Enter your broadcast message here..." maxlength="2000"></textarea>
-                        <div style="text-align: right; font-size: 12px; color: #9ca3af; margin-top: 5px;">
-                            <span id="charCount">0/2000</span> characters
+                    <div class="action-card" onclick="navigateTo('broadcasts')">
+                        <div class="action-icon" style="background: var(--success);">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="action-content">
+                            <h3>View All</h3>
+                            <p>See all broadcasts</p>
                         </div>
                     </div>
                     
-                    <div class="control-group">
-                        <label for="expiryDate">Expiry Date (Optional)</label>
-                        <input type="datetime-local" id="expiryDate">
+                    <div class="action-card" onclick="exportData()">
+                        <div class="action-icon" style="background: var(--warning);">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="action-content">
+                            <h3>Export Data</h3>
+                            <p>Backup all broadcasts</p>
+                        </div>
                     </div>
                     
-                    <button class="btn btn-primary" id="sendBroadcast">
-                        <i class="fas fa-save"></i> Save Broadcast Internally
+                    <div class="action-card" onclick="navigateTo('storage')">
+                        <div class="action-icon" style="background: var(--danger);">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="action-content">
+                            <h3>Storage</h3>
+                            <p>Manage your data</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-header">
+                    <h2>Recent Broadcasts</h2>
+                </div>
+                
+                <div id="recentBroadcasts" class="broadcasts-list">
+                    <!-- Recent broadcasts will be loaded here -->
+                </div>
+            </section>
+            
+            <!-- Create Section -->
+            <section id="createSection" class="section">
+                <div class="section-header">
+                    <h2>Create Broadcast</h2>
+                    <p>Send a new announcement to your system</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Title *</label>
+                    <input type="text" id="broadcastTitle" class="form-input" placeholder="Enter broadcast title" maxlength="100">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select id="broadcastType" class="form-select">
+                        <option value="announcement">📢 Announcement</option>
+                        <option value="alert">⚠️ Alert</option>
+                        <option value="maintenance">🔧 Maintenance</option>
+                        <option value="update">🔄 Update</option>
+                        <option value="news">📰 News</option>
+                        <option value="meeting">👥 Meeting</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Tags</label>
+                    <input type="text" id="tagsInput" class="form-input" placeholder="Add tags (press Enter)">
+                    <div id="tagsContainer" class="tag-input"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Urgency Level</label>
+                    <div class="urgency-options">
+                        <button class="urgency-btn low active" data-level="low">
+                            <i class="fas fa-info-circle"></i> Low
+                        </button>
+                        <button class="urgency-btn medium" data-level="medium">
+                            <i class="fas fa-exclamation-triangle"></i> Medium
+                        </button>
+                        <button class="urgency-btn high" data-level="high">
+                            <i class="fas fa-skull-crossbones"></i> High
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Message *</label>
+                    <textarea id="broadcastMessage" class="form-textarea" placeholder="Enter your message" maxlength="2000"></textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/2000 characters
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Expiry Date (Optional)</label>
+                    <input type="datetime-local" id="expiryDate" class="form-input">
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveBroadcast()">
+                        <i class="fas fa-save"></i> Save Broadcast
                     </button>
-                    
-                    <button class="btn btn-secondary" id="saveDraft">
+                    <button class="btn btn-secondary" onclick="saveAsDraft()">
                         <i class="fas fa-file-alt"></i> Save as Draft
                     </button>
+                    <button class="btn btn-secondary" onclick="navigateTo('home')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
                 </div>
-                
-                <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 12px;">
-                    <h4 style="margin-bottom: 10px; color: var(--primary-color);">
-                        <i class="fas fa-info-circle"></i> Storage Info
-                    </h4>
-                    <p style="font-size: 14px; color: #4b5563;">
-                        All broadcasts are saved <strong>internally</strong> in your browser's storage. 
-                        Data persists even when you close the browser.
-                    </p>
-                </div>
-            </div>
+            </section>
             
-            <!-- Main Area: Display Broadcasts -->
-            <div class="broadcast-display">
-                <div class="display-header">
-                    <h2><i class="fas fa-newspaper"></i> Saved Broadcasts</h2>
-                    <div class="filter-controls">
-                        <div class="search-bar">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="searchInput" placeholder="Search broadcasts...">
-                        </div>
-                        <button class="filter-btn active" data-filter="all">
-                            <i class="fas fa-list"></i> All
-                        </button>
-                        <button class="filter-btn" data-filter="active">
-                            <i class="fas fa-eye"></i> Active
-                        </button>
-                        <button class="filter-btn" data-filter="expired">
-                            <i class="fas fa-clock"></i> Expired
-                        </button>
-                        <button class="filter-btn" data-filter="draft">
-                            <i class="fas fa-file-alt"></i> Drafts
-                        </button>
-                    </div>
+            <!-- Broadcasts Section -->
+            <section id="broadcastsSection" class="section">
+                <div class="section-header">
+                    <h2>All Broadcasts</h2>
+                    <p>View and manage your announcements</p>
                 </div>
                 
-                <div class="broadcast-container" id="broadcastList">
-                    <!-- Broadcast items will be inserted here -->
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="active">Active</button>
+                    <button class="filter-btn" data-filter="expired">Expired</button>
+                    <button class="filter-btn" data-filter="drafts">Drafts</button>
+                    <button class="filter-btn" data-filter="urgent">Urgent</button>
                 </div>
                 
-                <div class="empty-state" id="emptyState">
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="broadcastSearch" class="form-input search-input" placeholder="Search broadcasts...">
+                </div>
+                
+                <div id="allBroadcasts" class="broadcasts-list">
+                    <!-- All broadcasts will be loaded here -->
+                </div>
+                
+                <div id="emptyBroadcasts" class="empty-state" style="display: none;">
                     <i class="fas fa-bullhorn"></i>
-                    <h3>No Broadcasts Found</h3>
+                    <h3>No broadcasts found</h3>
                     <p>Create your first broadcast to get started</p>
                 </div>
-            </div>
+            </section>
             
-            <!-- Right Panel: Storage Management -->
-            <div class="storage-panel">
+            <!-- Storage Section -->
+            <section id="storageSection" class="section">
+                <div class="section-header">
+                    <h2>Storage Management</h2>
+                    <p>Manage your internal storage and backups</p>
+                </div>
+                
                 <div class="storage-info">
-                    <h3 style="margin-bottom: 20px; color: #111827;">
-                        <i class="fas fa-database"></i> Internal Storage
-                    </h3>
-                    
-                    <div class="storage-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Total Broadcasts</span>
-                            <span class="stat-value" id="statTotal">0</span>
+                    <h3>Storage Usage</h3>
+                    <div class="storage-bar">
+                        <div class="storage-fill" id="storageFillBar"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--gray);">
+                        <span id="storageUsed">0 KB used</span>
+                        <span id="storageAvailable">5 MB available</span>
+                    </div>
+                </div>
+                
+                <div class="storage-stats">
+                    <div class="storage-stat">
+                        <span>Total Broadcasts</span>
+                        <strong id="storageStatTotal">0</strong>
+                    </div>
+                    <div class="storage-stat">
+                        <span>Drafts</span>
+                        <strong id="storageStatDrafts">0</strong>
+                    </div>
+                    <div class="storage-stat">
+                        <span>Export Files</span>
+                        <strong id="storageStatExports">0</strong>
+                    </div>
+                </div>
+                
+                <div class="storage-actions">
+                    <button class="btn btn-primary" onclick="exportData()">
+                        <i class="fas fa-download"></i> Export All Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="importData()">
+                        <i class="fas fa-upload"></i> Import Data
+                    </button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <button class="btn btn-secondary" onclick="clearExpired()">
+                        <i class="fas fa-trash"></i> Clear Expired
+                    </button>
+                    <button class="btn btn-danger" onclick="showClearAllModal()">
+                        <i class="fas fa-skull-crossbones"></i> Clear All Data
+                    </button>
+                </div>
+                
+                <div class="export-history">
+                    <h3 style="margin-bottom: 1rem;">Export History</h3>
+                    <div id="exportHistory">
+                        <!-- Export history will be loaded here -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Settings Section -->
+            <section id="settingsSection" class="section">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                    <p>Configure your InfoCast app</p>
+                </div>
+                
+                <div class="settings-group">
+                    <div class="settings-header">
+                        <i class="fas fa-bell"></i> Notifications
+                    </div>
+                    <div class="settings-content">
+                        <div class="setting-item">
+                            <span>Enable Sounds</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="soundToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Active Broadcasts</span>
-                            <span class="stat-value" id="statActive">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Drafts</span>
-                            <span class="stat-value" id="statDrafts">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Expired</span>
-                            <span class="stat-value" id="statExpired">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Storage Used</span>
-                            <span class="stat-value" id="statStorage">0 KB</span>
+                        <div class="setting-item">
+                            <span>Urgent Alerts</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="alertToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
                     </div>
                 </div>
                 
-                <div class="backup-controls">
-                    <h4><i class="fas fa-file-export"></i> Export & Backup</h4>
-                    <div class="backup-options">
-                        <button class="btn btn-primary" id="exportJSON">
-                            <i class="fas fa-download"></i> Export All as JSON
-                        </button>
-                        <button class="btn btn-secondary" id="exportCSV">
-                            <i class="fas fa-file-csv"></i> Export as CSV
-                        </button>
-                        <button class="btn btn-secondary" id="importData">
-                            <i class="fas fa-upload"></i> Import Data
-                        </button>
-                        <input type="file" id="importFile" accept=".json,.csv" style="display: none;">
+                <div class="settings-group">
+                    <div class="settings-header">
+                        <i class="fas fa-paint-brush"></i> Appearance
                     </div>
-                    
-                    <div style="margin-top: 20px;">
-                        <h4 style="margin-bottom: 10px;">Recent Exports</h4>
-                        <div id="exportHistory">
-                            <!-- Export history will be shown here -->
+                    <div class="settings-content">
+                        <div class="setting-item">
+                            <span>Dark Mode</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="darkModeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
                     </div>
                 </div>
                 
-                <div style="margin-top: 30px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);">
-                    <h4 style="margin-bottom: 15px; color: var(--dark-color);">
-                        <i class="fas fa-trash-alt"></i> Data Management
-                    </h4>
-                    <div style="display: grid; gap: 10px;">
-                        <button class="btn btn-danger" id="clearExpired">
-                            <i class="fas fa-clock"></i> Clear Expired Broadcasts
-                        </button>
-                        <button class="btn btn-danger" id="clearDrafts">
-                            <i class="fas fa-file-alt"></i> Clear All Drafts
-                        </button>
-                        <button class="btn btn-danger" id="clearAll">
-                            <i class="fas fa-skull-crossbones"></i> Clear ALL Data
-                        </button>
+                <div class="settings-group">
+                    <div class="settings-header">
+                        <i class="fas fa-database"></i> Data Management
                     </div>
-                    <p style="font-size: 12px; color: #ef4444; margin-top: 10px;">
-                        <i class="fas fa-exclamation-triangle"></i> Warning: These actions cannot be undone!
-                    </p>
+                    <div class="settings-content">
+                        <div class="setting-item">
+                            <span>Auto-save</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="autosaveToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span>Auto-clean Expired</span>
+                            <label class="toggle">
+                                <input type="checkbox" id="autocleanToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 
-                <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 12px;">
-                    <h4 style="margin-bottom: 10px; color: var(--primary-color);">
-                        <i class="fas fa-lightbulb"></i> Quick Tips
-                    </h4>
-                    <ul style="font-size: 14px; color: #4b5563; line-height: 1.6; padding-left: 20px;">
-                        <li>All data is saved in your browser's localStorage</li>
-                        <li>Use tags to organize broadcasts</li>
-                        <li>Set expiry dates for temporary announcements</li>
-                        <li>Export regularly to backup your data</li>
-                        <li>Search using keywords or tags</li>
-                    </ul>
+                <div class="settings-actions">
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetSettings()">
+                        <i class="fas fa-undo"></i> Reset to Defaults
+                    </button>
                 </div>
+            </section>
+        </main>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-section="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-btn" data-section="create">
+                <i class="fas fa-plus"></i>
+                <span>Create</span>
+            </button>
+            <button class="nav-btn" data-section="broadcasts">
+                <i class="fas fa-list"></i>
+                <span>Broadcasts</span>
+            </button>
+            <button class="nav-btn" data-section="storage">
+                <i class="fas fa-database"></i>
+                <span>Storage</span>
+            </button>
+            <button class="nav-btn" data-section="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+        </nav>
+        
+        <!-- Install Prompt -->
+        <div class="install-prompt" id="installPrompt">
+            <i class="fas fa-download" style="font-size: 1.5rem;"></i>
+            <div style="flex: 1;">
+                <h3 style="margin-bottom: 0.25rem;">Install InfoCast</h3>
+                <p style="font-size: 0.875rem; opacity: 0.9;">Install this app on your device for quick access</p>
+            </div>
+            <button class="btn btn-primary" onclick="installApp()" style="padding: 0.5rem 1rem;">
+                Install
+            </button>
+            <button class="icon-btn" onclick="hideInstallPrompt()" style="background: rgba(255,255,255,0.1); color: white;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Broadcast Detail Modal -->
+    <div class="modal" id="broadcastModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="margin: 0;">Broadcast Details</h2>
+                <button class="icon-btn" onclick="closeModal('broadcastModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="broadcastModalContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('broadcastModal')">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button class="btn btn-primary" onclick="editBroadcast()" id="editBroadcastBtn">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
             </div>
         </div>
-        
-        <footer style="background: var(--dark-color); color: white; padding: 20px 40px; text-align: center; font-size: 14px; border-top: 1px solid #374151;">
-            <p>InfoCast v3.0 • Internal Storage System • All data saved locally in browser • No internet required</p>
-            <div style="display: flex; justify-content: center; gap: 30px; margin-top: 10px;">
-                <span><i class="fas fa-hdd"></i> Storage: <span id="footerStorage">0% used</span></span>
-                <span><i class="fas fa-broadcast-tower"></i> Broadcasts: <span id="footerBroadcasts">0</span></span>
-                <span><i class="fas fa-history"></i> Last Saved: <span id="lastSaved">Just now</span></span>
-            </div>
-        </footer>
     </div>
-
-    <!-- Edit Broadcast Modal -->
-    <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto;">
-            <h2 style="margin-bottom: 20px; color: var(--dark-color);">
-                <i class="fas fa-edit"></i> Edit Broadcast
-            </h2>
-            
-            <div style="margin-bottom: 20px;">
-                <label for="editTitle">Broadcast Title</label>
-                <input type="text" id="editTitle" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+    
+    <!-- Clear All Modal -->
+    <div class="modal" id="clearAllModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="margin: 0; color: var(--danger);">
+                    <i class="fas fa-exclamation-triangle"></i> Warning
+                </h2>
             </div>
-            
-            <div style="margin-bottom: 20px;">
-                <label for="editType">Broadcast Type</label>
-                <select id="editType" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
-                    <option value="announcement">📢 General Announcement</option>
-                    <option value="alert">⚠️ Emergency Alert</option>
-                    <option value="maintenance">🔧 Maintenance Notice</option>
-                    <option value="update">🔄 System Update</option>
-                    <option value="news">📰 News Bulletin</option>
-                </select>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem;">This will permanently delete ALL data including:</p>
+                <ul style="margin-left: 1.5rem; margin-bottom: 1rem; color: var(--danger);">
+                    <li>All broadcasts</li>
+                    <li>All drafts</li>
+                    <li>Export history</li>
+                    <li>Settings</li>
+                </ul>
+                <p><strong>This action cannot be undone!</strong></p>
             </div>
-            
-            <div style="margin-bottom: 20px;">
-                <label for="editUrgency">Urgency Level</label>
-                <select id="editUrgency" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                </select>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                <label for="editMessage">Message</label>
-                <textarea id="editMessage" rows="6" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;"></textarea>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="saveEdit()" style="flex: 1; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
-                <button onclick="closeEditModal()" style="flex: 1; background: #6b7280; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('clearAllModal')">
                     <i class="fas fa-times"></i> Cancel
                 </button>
+                <button class="btn btn-danger" onclick="clearAllData()">
+                    <i class="fas fa-trash"></i> Delete Everything
+                </button>
             </div>
         </div>
     </div>
-
+    
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+    
+    <!-- Inline JavaScript -->
     <script>
         // ============================================
-        // INTERNAL STORAGE SYSTEM
+        // APP STATE & CONFIGURATION
         // ============================================
+        const APP_CONFIG = {
+            name: 'InfoCast',
+            version: '1.0.0',
+            storageLimit: 5 * 1024 * 1024, // 5MB
+            autoSaveInterval: 30000, // 30 seconds
+            checkExpiryInterval: 60000 // 1 minute
+        };
         
         // Storage keys
         const STORAGE_KEYS = {
-            BROADCASTS: 'infocast_broadcasts',
-            DRAFTS: 'infocast_drafts',
-            SETTINGS: 'infocast_settings',
-            EXPORTS: 'infocast_exports',
-            STATS: 'infocast_stats'
+            BROADCASTS: 'infocast_broadcasts_v2',
+            DRAFTS: 'infocast_drafts_v2',
+            SETTINGS: 'infocast_settings_v2',
+            EXPORTS: 'infocast_exports_v2',
+            STATS: 'infocast_stats_v2'
         };
         
         // App state
-        let selectedUrgency = "medium";
-        let broadcasts = [];
-        let drafts = [];
-        let exports = [];
-        let currentFilter = "all";
-        let searchQuery = "";
-        let editingId = null;
+        let appState = {
+            broadcasts: [],
+            drafts: [],
+            exports: [],
+            settings: {},
+            currentSection: 'home',
+            selectedUrgency: 'low',
+            tags: [],
+            searchQuery: '',
+            currentFilter: 'all',
+            deferredPrompt: null,
+            editBroadcastId: null
+        };
         
         // ============================================
-        // INITIALIZE APP
+        // APP INITIALIZATION
         // ============================================
         
         document.addEventListener('DOMContentLoaded', function() {
-            loadAllData();
-            setupEventListeners();
-            updateCharCount();
-            updateStorageStatus();
-            updateLastSaved();
-            
-            // Auto-save every 30 seconds
-            setInterval(autoSave, 30000);
-            
-            // Check for expired broadcasts every minute
-            setInterval(checkExpiredBroadcasts, 60000);
+            initializeApp();
         });
+        
+        function initializeApp() {
+            // Load all data
+            loadAllData();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Setup service worker for PWA
+            setupServiceWorker();
+            
+            // Setup auto-save and auto-check
+            setupAutoFeatures();
+            
+            // Check for updates
+            checkForUpdates();
+            
+            // Show welcome for first time users
+            if (appState.broadcasts.length === 0 && !localStorage.getItem('infocast_welcome_shown')) {
+                setTimeout(showWelcomeMessage, 1000);
+                localStorage.setItem('infocast_welcome_shown', 'true');
+            }
+        }
         
         function loadAllData() {
             // Load broadcasts
             const savedBroadcasts = localStorage.getItem(STORAGE_KEYS.BROADCASTS);
-            broadcasts = savedBroadcasts ? JSON.parse(savedBroadcasts) : [];
+            appState.broadcasts = savedBroadcasts ? JSON.parse(savedBroadcasts) : [];
             
             // Load drafts
             const savedDrafts = localStorage.getItem(STORAGE_KEYS.DRAFTS);
-            drafts = savedDrafts ? JSON.parse(savedDrafts) : [];
+            appState.drafts = savedDrafts ? JSON.parse(savedDrafts) : [];
             
-            // Load exports history
+            // Load exports
             const savedExports = localStorage.getItem(STORAGE_KEYS.EXPORTS);
-            exports = savedExports ? JSON.parse(savedExports) : [];
+            appState.exports = savedExports ? JSON.parse(savedExports) : [];
             
-            // Display data
-            displayBroadcasts();
-            displayExportHistory();
-            updateStats();
+            // Load settings
+            const savedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+            appState.settings = savedSettings ? JSON.parse(savedSettings) : getDefaultSettings();
+            
+            // Apply settings
+            applySettings();
+            
+            // Update UI
+            updateDashboard();
+            displayRecentBroadcasts();
+            updateStorageInfo();
         }
         
+        function getDefaultSettings() {
+            return {
+                enableSounds: true,
+                enableAlerts: true,
+                darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
+                autoSave: true,
+                autoClean: false,
+                notifications: true
+            };
+        }
+        
+        function applySettings() {
+            // Apply dark mode
+            if (appState.settings.darkMode) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            
+            // Update toggle states
+            document.getElementById('soundToggle').checked = appState.settings.enableSounds;
+            document.getElementById('alertToggle').checked = appState.settings.enableAlerts;
+            document.getElementById('darkModeToggle').checked = appState.settings.darkMode;
+            document.getElementById('autosaveToggle').checked = appState.settings.autoSave;
+            document.getElementById('autocleanToggle').checked = appState.settings.autoClean;
+        }
+        
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        
         function setupEventListeners() {
-            // Urgency buttons
-            document.querySelectorAll('.urgency-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.urgency-btn').forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedUrgency = this.getAttribute('data-level');
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    navigateTo(section);
                 });
             });
             
-            // Send broadcast button
-            document.getElementById('sendBroadcast').addEventListener('click', saveBroadcast);
+            // Urgency buttons
+            document.querySelectorAll('.urgency-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.urgency-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    appState.selectedUrgency = this.getAttribute('data-level');
+                });
+            });
             
-            // Save draft button
-            document.getElementById('saveDraft').addEventListener('click', saveAsDraft);
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    appState.currentFilter = this.getAttribute('data-filter');
+                    displayAllBroadcasts();
+                });
+            });
+            
+            // Search
+            document.getElementById('broadcastSearch').addEventListener('input', function() {
+                appState.searchQuery = this.value.toLowerCase();
+                displayAllBroadcasts();
+            });
+            
+            // Tags input
+            document.getElementById('tagsInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value.trim()) {
+                    e.preventDefault();
+                    addTag(this.value.trim());
+                    this.value = '';
+                }
+            });
             
             // Character count
             document.getElementById('broadcastMessage').addEventListener('input', updateCharCount);
             
-            // Filter buttons
-            document.querySelectorAll('.filter-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFilter = this.getAttribute('data-filter');
-                    displayBroadcasts();
-                });
+            // Header buttons
+            document.getElementById('refreshBtn').addEventListener('click', refreshData);
+            document.getElementById('settingsBtn').addEventListener('click', () => navigateTo('settings'));
+            
+            // Import file
+            document.getElementById('importFile').addEventListener('change', handleImportFile);
+            
+            // PWA install prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                appState.deferredPrompt = e;
+                showInstallPrompt();
             });
             
-            // Search input
-            document.getElementById('searchInput').addEventListener('input', function() {
-                searchQuery = this.value.toLowerCase();
-                displayBroadcasts();
+            // Online/Offline detection
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            
+            // Prevent accidental refresh
+            window.addEventListener('beforeunload', (e) => {
+                if (appState.broadcasts.length > 0) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
             });
-            
-            // Export buttons
-            document.getElementById('exportJSON').addEventListener('click', exportToJSON);
-            document.getElementById('exportCSV').addEventListener('click', exportToCSV);
-            document.getElementById('importData').addEventListener('click', () => document.getElementById('importFile').click());
-            document.getElementById('importFile').addEventListener('change', importData);
-            
-            // Clear buttons
-            document.getElementById('clearExpired').addEventListener('click', clearExpired);
-            document.getElementById('clearDrafts').addEventListener('click', clearDrafts);
-            document.getElementById('clearAll').addEventListener('click', clearAllData);
         }
         
         // ============================================
-        // BROADCAST FUNCTIONS
+        // NAVIGATION
+        // ============================================
+        
+        function navigateTo(section) {
+            // Update active section
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(section + 'Section').classList.add('active');
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            
+            appState.currentSection = section;
+            
+            // Update content based on section
+            switch(section) {
+                case 'home':
+                    updateDashboard();
+                    displayRecentBroadcasts();
+                    break;
+                case 'broadcasts':
+                    displayAllBroadcasts();
+                    break;
+                case 'storage':
+                    updateStorageInfo();
+                    displayExportHistory();
+                    break;
+            }
+            
+            // Close search if open
+            document.getElementById('broadcastSearch').value = '';
+            appState.searchQuery = '';
+        }
+        
+        // ============================================
+        // BROADCAST MANAGEMENT
         // ============================================
         
         function saveBroadcast() {
             const title = document.getElementById('broadcastTitle').value.trim();
             const type = document.getElementById('broadcastType').value;
-            const tags = document.getElementById('broadcastTags').value.trim();
             const message = document.getElementById('broadcastMessage').value.trim();
             const expiry = document.getElementById('expiryDate').value;
             
             if (!title || !message) {
-                showNotification('Please fill in title and message fields', 'error');
+                showToast('Please fill in title and message', 'error');
                 return;
             }
             
@@ -956,8 +1622,8 @@
                 id: Date.now(),
                 title: title,
                 type: type,
-                tags: tags ? tags.split(',').map(t => t.trim()).filter(t => t) : [],
-                urgency: selectedUrgency,
+                tags: [...appState.tags],
+                urgency: appState.selectedUrgency,
                 message: message,
                 timestamp: new Date().toISOString(),
                 created: Date.now(),
@@ -967,35 +1633,34 @@
                 edited: false
             };
             
-            // Add to broadcasts array
-            broadcasts.unshift(broadcast);
+            // Add to broadcasts
+            appState.broadcasts.unshift(broadcast);
             
-            // Save to localStorage
+            // Save to storage
             saveToStorage();
             
             // Clear form
-            document.getElementById('broadcastTitle').value = '';
-            document.getElementById('broadcastTags').value = '';
-            document.getElementById('broadcastMessage').value = '';
-            document.getElementById('expiryDate').value = '';
+            clearForm();
             
             // Update UI
-            displayBroadcasts();
-            updateStats();
+            updateDashboard();
+            displayRecentBroadcasts();
             
-            // Show notification
-            showNotification('Broadcast saved internally!', 'success');
+            // Show success
+            showToast('Broadcast saved successfully!', 'success');
             
-            // Play sound for urgent broadcasts
-            if (selectedUrgency === 'high') {
+            // Play sound if enabled
+            if (appState.settings.enableSounds && broadcast.urgency === 'high') {
                 playAlertSound();
             }
+            
+            // Navigate to home
+            navigateTo('home');
         }
         
         function saveAsDraft() {
             const title = document.getElementById('broadcastTitle').value.trim() || 'Untitled Draft';
             const type = document.getElementById('broadcastType').value;
-            const tags = document.getElementById('broadcastTags').value.trim();
             const message = document.getElementById('broadcastMessage').value.trim();
             const expiry = document.getElementById('expiryDate').value;
             
@@ -1003,8 +1668,8 @@
                 id: Date.now(),
                 title: title,
                 type: type,
-                tags: tags ? tags.split(',').map(t => t.trim()).filter(t => t) : [],
-                urgency: selectedUrgency,
+                tags: [...appState.tags],
+                urgency: appState.selectedUrgency,
                 message: message,
                 timestamp: new Date().toISOString(),
                 created: Date.now(),
@@ -1012,276 +1677,262 @@
                 status: 'draft'
             };
             
-            // Add to drafts array
-            drafts.unshift(draft);
+            appState.drafts.unshift(draft);
+            localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(appState.drafts));
             
-            // Save to localStorage
-            localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(drafts));
-            
-            // Clear form
+            clearForm();
+            showToast('Draft saved!', 'success');
+            navigateTo('home');
+        }
+        
+        function clearForm() {
             document.getElementById('broadcastTitle').value = '';
-            document.getElementById('broadcastTags').value = '';
             document.getElementById('broadcastMessage').value = '';
             document.getElementById('expiryDate').value = '';
-            
-            // Update UI
-            updateStats();
-            
-            // Show notification
-            showNotification('Draft saved!', 'success');
+            appState.tags = [];
+            updateTagsDisplay();
+            updateCharCount();
         }
         
-        function deleteBroadcast(id, isDraft = false) {
-            if (!confirm('Are you sure you want to delete this broadcast?')) return;
-            
-            if (isDraft) {
-                drafts = drafts.filter(d => d.id !== id);
-                localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(drafts));
-            } else {
-                broadcasts = broadcasts.filter(b => b.id !== id);
-                saveToStorage();
-            }
-            
-            displayBroadcasts();
-            updateStats();
-            showNotification('Broadcast deleted', 'info');
+        function updateCharCount() {
+            const message = document.getElementById('broadcastMessage').value;
+            document.getElementById('charCount').textContent = message.length;
         }
         
-        function editBroadcast(id) {
-            const broadcast = broadcasts.find(b => b.id === id);
-            if (!broadcast) return;
-            
-            editingId = id;
-            document.getElementById('editTitle').value = broadcast.title;
-            document.getElementById('editType').value = broadcast.type;
-            document.getElementById('editUrgency').value = broadcast.urgency;
-            document.getElementById('editMessage').value = broadcast.message;
-            document.getElementById('editModal').style.display = 'flex';
-        }
-        
-        function saveEdit() {
-            if (!editingId) return;
-            
-            const broadcast = broadcasts.find(b => b.id === editingId);
-            if (broadcast) {
-                broadcast.title = document.getElementById('editTitle').value.trim();
-                broadcast.type = document.getElementById('editType').value;
-                broadcast.urgency = document.getElementById('editUrgency').value;
-                broadcast.message = document.getElementById('editMessage').value.trim();
-                broadcast.edited = true;
-                broadcast.lastEdited = new Date().toISOString();
-                
-                saveToStorage();
-                displayBroadcasts();
-                updateStats();
-                showNotification('Broadcast updated!', 'success');
-            }
-            
-            closeEditModal();
-        }
-        
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-            editingId = null;
-        }
-        
-        function toggleBroadcastStatus(id) {
-            const broadcast = broadcasts.find(b => b.id === id);
-            if (broadcast) {
-                broadcast.status = broadcast.status === 'active' ? 'archived' : 'active';
-                saveToStorage();
-                displayBroadcasts();
-                updateStats();
-                showNotification(`Broadcast ${broadcast.status}`, 'info');
+        function addTag(tag) {
+            if (tag && !appState.tags.includes(tag)) {
+                appState.tags.push(tag);
+                updateTagsDisplay();
             }
         }
         
-        function viewBroadcast(id) {
-            const broadcast = broadcasts.find(b => b.id === id);
-            if (broadcast) {
-                broadcast.views = (broadcast.views || 0) + 1;
-                saveToStorage();
-                
-                // Show broadcast in modal
-                alert(`Broadcast: ${broadcast.title}\n\n${broadcast.message}`);
-            }
+        function removeTag(index) {
+            appState.tags.splice(index, 1);
+            updateTagsDisplay();
+        }
+        
+        function updateTagsDisplay() {
+            const container = document.getElementById('tagsContainer');
+            container.innerHTML = appState.tags.map((tag, i) => `
+                <span class="tag">
+                    ${tag}
+                    <span class="tag-remove" onclick="removeTag(${i})">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </span>
+            `).join('');
         }
         
         // ============================================
-        // DISPLAY FUNCTIONS
+        // BROADCAST DISPLAY
         // ============================================
         
-        function displayBroadcasts() {
-            const broadcastList = document.getElementById('broadcastList');
-            const emptyState = document.getElementById('emptyState');
+        function displayRecentBroadcasts() {
+            const container = document.getElementById('recentBroadcasts');
+            const recent = appState.broadcasts.slice(0, 3);
             
-            let filteredBroadcasts = [...broadcasts];
+            if (recent.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bullhorn"></i>
+                        <h3>No broadcasts yet</h3>
+                        <p>Create your first broadcast to get started</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = recent.map(broadcast => `
+                <div class="broadcast-card" onclick="showBroadcastDetail(${broadcast.id})">
+                    <div class="broadcast-header">
+                        <div class="broadcast-title">${broadcast.title}</div>
+                        <div class="broadcast-badge ${broadcast.urgency}">${broadcast.urgency}</div>
+                    </div>
+                    ${broadcast.tags.length > 0 ? `
+                        <div class="broadcast-tags">
+                            ${broadcast.tags.map(tag => `<span class="broadcast-tag">${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="broadcast-message">${broadcast.message.substring(0, 100)}${broadcast.message.length > 100 ? '...' : ''}</div>
+                    <div class="broadcast-footer">
+                        <div class="broadcast-type">
+                            <i class="fas fa-${getTypeIcon(broadcast.type)}"></i>
+                            ${getTypeName(broadcast.type)}
+                        </div>
+                        <div>${formatDate(broadcast.timestamp)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function displayAllBroadcasts() {
+            const container = document.getElementById('allBroadcasts');
+            const emptyState = document.getElementById('emptyBroadcasts');
+            
+            let broadcasts = [...appState.broadcasts];
             
             // Apply filter
-            switch(currentFilter) {
+            switch(appState.currentFilter) {
                 case 'active':
-                    filteredBroadcasts = filteredBroadcasts.filter(b => 
+                    broadcasts = broadcasts.filter(b => 
                         b.status === 'active' && 
                         (!b.expiry || b.expiry > Date.now())
                     );
                     break;
                 case 'expired':
-                    filteredBroadcasts = filteredBroadcasts.filter(b => 
+                    broadcasts = broadcasts.filter(b => 
                         b.expiry && b.expiry <= Date.now()
                     );
                     break;
-                case 'draft':
-                    filteredBroadcasts = [...drafts];
+                case 'drafts':
+                    broadcasts = [...appState.drafts];
+                    break;
+                case 'urgent':
+                    broadcasts = broadcasts.filter(b => b.urgency === 'high');
                     break;
             }
             
             // Apply search
-            if (searchQuery) {
-                filteredBroadcasts = filteredBroadcasts.filter(b => 
-                    b.title.toLowerCase().includes(searchQuery) ||
-                    b.message.toLowerCase().includes(searchQuery) ||
-                    b.tags.some(tag => tag.toLowerCase().includes(searchQuery))
+            if (appState.searchQuery) {
+                broadcasts = broadcasts.filter(b => 
+                    b.title.toLowerCase().includes(appState.searchQuery) ||
+                    b.message.toLowerCase().includes(appState.searchQuery) ||
+                    b.tags.some(tag => tag.toLowerCase().includes(appState.searchQuery))
                 );
             }
             
-            if (filteredBroadcasts.length === 0) {
-                broadcastList.innerHTML = '';
+            if (broadcasts.length === 0) {
+                container.innerHTML = '';
                 emptyState.style.display = 'block';
                 return;
             }
             
             emptyState.style.display = 'none';
-            broadcastList.innerHTML = '';
-            
-            filteredBroadcasts.forEach(broadcast => {
-                const isDraft = currentFilter === 'draft';
-                const isExpired = broadcast.expiry && broadcast.expiry <= Date.now();
-                
-                const broadcastElement = document.createElement('div');
-                broadcastElement.className = 'broadcast-item';
-                
-                // Set border color based on urgency
-                let urgencyColor, urgencyText;
-                switch(broadcast.urgency) {
-                    case 'high':
-                        urgencyColor = 'var(--danger-color)';
-                        urgencyText = 'High Urgency';
-                        if (!isDraft && !isExpired) broadcastElement.classList.add('urgent-flash');
-                        break;
-                    case 'medium':
-                        urgencyColor = 'var(--warning-color)';
-                        urgencyText = 'Medium Urgency';
-                        break;
-                    case 'low':
-                        urgencyColor = 'var(--success-color)';
-                        urgencyText = 'Low Urgency';
-                        break;
-                }
-                
-                // If expired, override color
-                if (isExpired) {
-                    urgencyColor = '#9ca3af';
-                    urgencyText = 'Expired';
-                }
-                
-                // If draft, override color
-                if (isDraft) {
-                    urgencyColor = '#8b5cf6';
-                    urgencyText = 'Draft';
-                }
-                
-                broadcastElement.style.borderLeftColor = urgencyColor;
-                
-                // Format type display
-                let typeIcon, typeText;
-                switch(broadcast.type) {
-                    case 'announcement': typeIcon = '📢'; typeText = 'Announcement'; break;
-                    case 'alert': typeIcon = '⚠️'; typeText = 'Alert'; break;
-                    case 'maintenance': typeIcon = '🔧'; typeText = 'Maintenance'; break;
-                    case 'update': typeIcon = '🔄'; typeText = 'Update'; break;
-                    case 'news': typeIcon = '📰'; typeText = 'News'; break;
-                    case 'meeting': typeIcon = '👥'; typeText = 'Meeting'; break;
-                    case 'deadline': typeIcon = '⏰'; typeText = 'Deadline'; break;
-                    case 'holiday': typeIcon = '🎉'; typeText = 'Holiday'; break;
-                }
-                
-                // Format time
-                const time = new Date(broadcast.timestamp);
-                const timeString = time.toLocaleString();
-                
-                // Expiry info
-                let expiryInfo = '';
-                if (broadcast.expiry) {
-                    const expiryDate = new Date(broadcast.expiry);
-                    if (isExpired) {
-                        expiryInfo = `<div style="font-size: 12px; color: #ef4444; margin-top: 5px;">
-                            <i class="fas fa-clock"></i> Expired on ${expiryDate.toLocaleString()}
-                        </div>`;
-                    } else {
-                        expiryInfo = `<div style="font-size: 12px; color: var(--warning-color); margin-top: 5px;">
-                            <i class="fas fa-clock"></i> Expires on ${expiryDate.toLocaleString()}
-                        </div>`;
-                    }
-                }
-                
-                // Edited info
-                let editedInfo = '';
-                if (broadcast.edited) {
-                    editedInfo = `<span style="color: #6b7280; font-size: 12px;">
-                        <i class="fas fa-edit"></i> Edited
-                    </span>`;
-                }
-                
-                broadcastElement.innerHTML = `
+            container.innerHTML = broadcasts.map(broadcast => `
+                <div class="broadcast-card ${broadcast.urgency === 'high' ? 'urgent' : ''}" onclick="showBroadcastDetail(${broadcast.id}, ${appState.currentFilter === 'drafts'})">
                     <div class="broadcast-header">
                         <div class="broadcast-title">${broadcast.title}</div>
-                        <div class="broadcast-actions">
-                            ${!isDraft ? `
-                                <button class="action-btn" onclick="viewBroadcast(${broadcast.id})" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="action-btn" onclick="editBroadcast(${broadcast.id})" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="action-btn" onclick="toggleBroadcastStatus(${broadcast.id})" title="${broadcast.status === 'active' ? 'Archive' : 'Activate'}">
-                                    <i class="fas ${broadcast.status === 'active' ? 'fa-archive' : 'fa-eye'}"></i>
-                                </button>
-                            ` : ''}
-                            <button class="action-btn" onclick="deleteBroadcast(${broadcast.id}, ${isDraft})" title="Delete">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
+                        <div class="broadcast-badge ${broadcast.urgency}">${broadcast.urgency}</div>
                     </div>
-                    
-                    <div class="broadcast-urgency" style="background: ${urgencyColor}20; color: ${urgencyColor}">
-                        ${urgencyText}
-                    </div>
-                    
-                    ${broadcast.tags && broadcast.tags.length > 0 ? `
-                        <div class="tag-list">
-                            ${broadcast.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    ${broadcast.tags.length > 0 ? `
+                        <div class="broadcast-tags">
+                            ${broadcast.tags.map(tag => `<span class="broadcast-tag">${tag}</span>`).join('')}
                         </div>
                     ` : ''}
-                    
-                    <div class="broadcast-content">
-                        ${broadcast.message}
-                        ${expiryInfo}
-                    </div>
-                    
+                    <div class="broadcast-message">${broadcast.message.substring(0, 100)}${broadcast.message.length > 100 ? '...' : ''}</div>
                     <div class="broadcast-footer">
                         <div class="broadcast-type">
-                            ${typeIcon} ${typeText}
-                            ${editedInfo}
-                            ${broadcast.views > 0 ? `<span style="margin-left: 10px; color: #6b7280;"><i class="fas fa-eye"></i> ${broadcast.views}</span>` : ''}
+                            <i class="fas fa-${getTypeIcon(broadcast.type)}"></i>
+                            ${getTypeName(broadcast.type)}
+                            ${broadcast.status === 'draft' ? ' (Draft)' : ''}
                         </div>
-                        <div class="broadcast-time">
-                            <i class="far fa-clock"></i> ${timeString}
+                        <div>${formatDate(broadcast.timestamp)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function showBroadcastDetail(id, isDraft = false) {
+            const broadcast = isDraft ? 
+                appState.drafts.find(d => d.id === id) : 
+                appState.broadcasts.find(b => b.id === id);
+            
+            if (!broadcast) return;
+            
+            // Update views if not draft
+            if (!isDraft) {
+                broadcast.views = (broadcast.views || 0) + 1;
+                saveToStorage();
+            }
+            
+            const modalContent = document.getElementById('broadcastModalContent');
+            const editBtn = document.getElementById('editBroadcastBtn');
+            
+            // Hide edit button for drafts (for now)
+            editBtn.style.display = isDraft ? 'none' : 'block';
+            appState.editBroadcastId = isDraft ? null : id;
+            
+            modalContent.innerHTML = `
+                <h3 style="margin-bottom: 1rem;">${broadcast.title}</h3>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span class="broadcast-badge ${broadcast.urgency}">${broadcast.urgency} urgency</span>
+                    <span class="broadcast-badge" style="background: rgba(37, 99, 235, 0.1); color: var(--primary);">
+                        <i class="fas fa-${getTypeIcon(broadcast.type)}"></i> ${getTypeName(broadcast.type)}
+                    </span>
+                    ${isDraft ? '<span class="broadcast-badge" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">Draft</span>' : ''}
+                </div>
+                
+                ${broadcast.tags.length > 0 ? `
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Tags:</strong>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.5rem;">
+                            ${broadcast.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                         </div>
                     </div>
-                `;
+                ` : ''}
                 
-                broadcastList.appendChild(broadcastElement);
-            });
+                <div style="margin-bottom: 1rem;">
+                    <strong>Message:</strong>
+                    <div style="background: var(--light); padding: 1rem; border-radius: 8px; margin-top: 0.5rem; white-space: pre-wrap;">
+                        ${broadcast.message}
+                    </div>
+                </div>
+                
+                <div style="display: grid; gap: 0.75rem; background: var(--light); padding: 1rem; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Created:</span>
+                        <strong>${formatDate(broadcast.timestamp)}</strong>
+                    </div>
+                    ${broadcast.expiry ? `
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Expires:</span>
+                            <strong>${formatDate(new Date(broadcast.expiry).toISOString())}</strong>
+                        </div>
+                    ` : ''}
+                    ${!isDraft ? `
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Views:</span>
+                            <strong>${broadcast.views || 0}</strong>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            openModal('broadcastModal');
+        }
+        
+        function editBroadcast() {
+            if (!appState.editBroadcastId) return;
+            
+            const broadcast = appState.broadcasts.find(b => b.id === appState.editBroadcastId);
+            if (!broadcast) return;
+            
+            // Navigate to create section with data
+            navigateTo('create');
+            
+            // Fill form with broadcast data
+            document.getElementById('broadcastTitle').value = broadcast.title;
+            document.getElementById('broadcastType').value = broadcast.type;
+            document.getElementById('broadcastMessage').value = broadcast.message;
+            document.getElementById('expiryDate').value = broadcast.expiry ? 
+                new Date(broadcast.expiry).toISOString().slice(0, 16) : '';
+            
+            // Set urgency
+            document.querySelectorAll('.urgency-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.urgency-btn.${broadcast.urgency}`).classList.add('active');
+            appState.selectedUrgency = broadcast.urgency;
+            
+            // Set tags
+            appState.tags = [...broadcast.tags];
+            updateTagsDisplay();
+            updateCharCount();
+            
+            // Mark for update
+            appState.editBroadcastId = broadcast.id;
+            
+            closeModal('broadcastModal');
+            
+            showToast('Edit broadcast details and save changes', 'info');
         }
         
         // ============================================
@@ -1289,91 +1940,89 @@
         // ============================================
         
         function saveToStorage() {
-            localStorage.setItem(STORAGE_KEYS.BROADCASTS, JSON.stringify(broadcasts));
-            updateLastSaved();
-            updateStorageStatus();
+            localStorage.setItem(STORAGE_KEYS.BROADCASTS, JSON.stringify(appState.broadcasts));
+            localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(appState.drafts));
+            localStorage.setItem(STORAGE_KEYS.EXPORTS, JSON.stringify(appState.exports));
+            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(appState.settings));
+            
+            updateDashboard();
+            updateStorageInfo();
         }
         
-        function autoSave() {
-            saveToStorage();
-            showNotification('Auto-saved all data', 'info', 2000);
-        }
-        
-        function updateStorageStatus() {
-            // Calculate storage usage
-            let totalSize = 0;
-            
-            // Add broadcasts size
-            const broadcastsString = JSON.stringify(broadcasts);
-            totalSize += new Blob([broadcastsString]).size;
-            
-            // Add drafts size
-            const draftsString = JSON.stringify(drafts);
-            totalSize += new Blob([draftsString]).size;
-            
-            // Add exports size
-            const exportsString = JSON.stringify(exports);
-            totalSize += new Blob([exportsString]).size;
-            
-            // Convert to KB
-            const sizeKB = (totalSize / 1024).toFixed(2);
-            const maxSize = 5120; // 5MB in KB
-            const percentage = Math.min((totalSize / (maxSize * 1024)) * 100, 100);
-            
-            // Update UI
-            document.getElementById('storageFill').style.width = `${percentage}%`;
-            document.getElementById('statStorage').textContent = `${sizeKB} KB`;
-            document.getElementById('footerStorage').textContent = `${percentage.toFixed(1)}% used`;
-            
-            // Update status text
-            let statusText;
-            if (percentage < 50) {
-                statusText = `${(100 - percentage).toFixed(0)}% Available`;
-            } else if (percentage < 80) {
-                statusText = `${(100 - percentage).toFixed(0)}% Available`;
-            } else {
-                statusText = `Warning: ${percentage.toFixed(0)}% Used`;
-            }
-            document.getElementById('storageStatus').textContent = statusText;
-        }
-        
-        function updateStats() {
-            const activeCount = broadcasts.filter(b => 
+        function updateDashboard() {
+            const activeCount = appState.broadcasts.filter(b => 
                 b.status === 'active' && 
                 (!b.expiry || b.expiry > Date.now())
             ).length;
             
-            const expiredCount = broadcasts.filter(b => 
+            const expiredCount = appState.broadcasts.filter(b => 
                 b.expiry && b.expiry <= Date.now()
             ).length;
             
-            document.getElementById('statTotal').textContent = broadcasts.length;
+            // Update stats
+            document.getElementById('statTotal').textContent = appState.broadcasts.length;
             document.getElementById('statActive').textContent = activeCount;
-            document.getElementById('statDrafts').textContent = drafts.length;
             document.getElementById('statExpired').textContent = expiredCount;
-            document.getElementById('footerBroadcasts').textContent = broadcasts.length;
+            document.getElementById('statStorage').textContent = calculateStorageSize();
         }
         
-        function updateLastSaved() {
-            const now = new Date();
-            document.getElementById('lastSaved').textContent = now.toLocaleTimeString();
+        function updateStorageInfo() {
+            const totalSize = calculateTotalStorageSize();
+            const maxSize = APP_CONFIG.storageLimit;
+            const percentage = Math.min((totalSize / maxSize) * 100, 100);
+            
+            // Update storage bar
+            document.getElementById('storageFillBar').style.width = `${percentage}%`;
+            document.getElementById('storageUsed').textContent = formatBytes(totalSize);
+            document.getElementById('storageAvailable').textContent = formatBytes(maxSize - totalSize);
+            
+            // Update storage stats
+            document.getElementById('storageStatTotal').textContent = appState.broadcasts.length;
+            document.getElementById('storageStatDrafts').textContent = appState.drafts.length;
+            document.getElementById('storageStatExports').textContent = appState.exports.length;
         }
         
-        function updateCharCount() {
-            const message = document.getElementById('broadcastMessage').value;
-            document.getElementById('charCount').textContent = `${message.length}/2000`;
+        function calculateTotalStorageSize() {
+            let total = 0;
+            
+            // Add size of all stored data
+            const keys = [STORAGE_KEYS.BROADCASTS, STORAGE_KEYS.DRAFTS, STORAGE_KEYS.EXPORTS, STORAGE_KEYS.SETTINGS];
+            
+            keys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    total += new Blob([data]).size;
+                }
+            });
+            
+            return total;
+        }
+        
+        function calculateStorageSize() {
+            const size = calculateTotalStorageSize();
+            return formatBytes(size);
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
         // ============================================
-        // EXPORT/IMPORT FUNCTIONS
+        // EXPORT/IMPORT
         // ============================================
         
-        function exportToJSON() {
+        function exportData() {
             const exportData = {
-                broadcasts: broadcasts,
-                drafts: drafts,
+                app: APP_CONFIG.name,
+                version: APP_CONFIG.version,
                 exportedAt: new Date().toISOString(),
-                version: '1.0'
+                broadcasts: appState.broadcasts,
+                drafts: appState.drafts,
+                settings: appState.settings
             };
             
             const dataStr = JSON.stringify(exportData, null, 2);
@@ -1391,60 +2040,23 @@
             // Add to export history
             const exportRecord = {
                 id: Date.now(),
-                type: 'JSON',
+                type: 'Full Backup',
                 date: new Date().toISOString(),
-                size: (dataBlob.size / 1024).toFixed(2) + ' KB'
+                size: formatBytes(dataBlob.size)
             };
-            exports.unshift(exportRecord);
-            localStorage.setItem(STORAGE_KEYS.EXPORTS, JSON.stringify(exports));
+            
+            appState.exports.unshift(exportRecord);
+            saveToStorage();
             displayExportHistory();
             
-            showNotification('Data exported as JSON file', 'success');
+            showToast('Data exported successfully!', 'success');
         }
         
-        function exportToCSV() {
-            // Convert broadcasts to CSV
-            let csvContent = "ID,Title,Type,Urgency,Message,Tags,Timestamp,Expiry,Status\n";
-            
-            broadcasts.forEach(broadcast => {
-                const row = [
-                    broadcast.id,
-                    `"${broadcast.title.replace(/"/g, '""')}"`,
-                    broadcast.type,
-                    broadcast.urgency,
-                    `"${broadcast.message.replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-                    `"${broadcast.tags.join(',')}"`,
-                    broadcast.timestamp,
-                    broadcast.expiry || '',
-                    broadcast.status
-                ];
-                csvContent += row.join(',') + '\n';
-            });
-            
-            const dataBlob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `infocast-broadcasts-${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Add to export history
-            const exportRecord = {
-                id: Date.now(),
-                type: 'CSV',
-                date: new Date().toISOString(),
-                size: (dataBlob.size / 1024).toFixed(2) + ' KB'
-            };
-            exports.unshift(exportRecord);
-            localStorage.setItem(STORAGE_KEYS.EXPORTS, JSON.stringify(exports));
-            displayExportHistory();
-            
-            showNotification('Broadcasts exported as CSV file', 'success');
+        function importData() {
+            document.getElementById('importFile').click();
         }
         
-        function importData(event) {
+        function handleImportFile(event) {
             const file = event.target.files[0];
             if (!file) return;
             
@@ -1453,30 +2065,33 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     
-                    if (data.broadcasts && Array.isArray(data.broadcasts)) {
+                    if (!data.broadcasts || !Array.isArray(data.broadcasts)) {
+                        throw new Error('Invalid backup file');
+                    }
+                    
+                    // Ask for import type
+                    if (confirm('Import broadcasts? This will add them to your existing data.')) {
                         // Merge broadcasts (avoid duplicates by ID)
-                        const existingIds = new Set(broadcasts.map(b => b.id));
+                        const existingIds = new Set(appState.broadcasts.map(b => b.id));
                         const newBroadcasts = data.broadcasts.filter(b => !existingIds.has(b.id));
                         
-                        broadcasts = [...newBroadcasts, ...broadcasts];
+                        appState.broadcasts = [...newBroadcasts, ...appState.broadcasts];
                         
                         // Merge drafts if available
                         if (data.drafts && Array.isArray(data.drafts)) {
-                            const existingDraftIds = new Set(drafts.map(d => d.id));
+                            const existingDraftIds = new Set(appState.drafts.map(d => d.id));
                             const newDrafts = data.drafts.filter(d => !existingDraftIds.has(d.id));
-                            drafts = [...newDrafts, ...drafts];
+                            appState.drafts = [...newDrafts, ...appState.drafts];
                         }
                         
+                        // Save and update
                         saveToStorage();
-                        displayBroadcasts();
-                        updateStats();
+                        displayRecentBroadcasts();
                         
-                        showNotification(`Imported ${newBroadcasts.length} broadcasts`, 'success');
-                    } else {
-                        throw new Error('Invalid file format');
+                        showToast(`Imported ${newBroadcasts.length} broadcasts`, 'success');
                     }
                 } catch (error) {
-                    showNotification('Error importing file. Please check the format.', 'error');
+                    showToast('Error importing file. Invalid format.', 'error');
                 }
             };
             reader.readAsText(file);
@@ -1486,143 +2101,280 @@
         }
         
         function displayExportHistory() {
-            const exportHistory = document.getElementById('exportHistory');
+            const container = document.getElementById('exportHistory');
             
-            if (exports.length === 0) {
-                exportHistory.innerHTML = '<div style="color: #9ca3af; font-size: 14px; text-align: center;">No exports yet</div>';
+            if (appState.exports.length === 0) {
+                container.innerHTML = '<div style="color: var(--gray); text-align: center; padding: 2rem;">No exports yet</div>';
                 return;
             }
             
-            exportHistory.innerHTML = exports.slice(0, 5).map(exp => `
+            container.innerHTML = appState.exports.slice(0, 5).map(exp => `
                 <div class="export-item">
                     <div>
-                        <div class="export-name">${exp.type} Export</div>
-                        <div class="export-date">${new Date(exp.date).toLocaleString()}</div>
+                        <div style="font-weight: 600;">${exp.type}</div>
+                        <div style="font-size: 0.875rem; color: var(--gray);">${formatDate(exp.date)}</div>
                     </div>
-                    <div style="color: #6b7280; font-size: 12px;">${exp.size}</div>
+                    <div style="font-size: 0.875rem; color: var(--gray);">${exp.size}</div>
                 </div>
             `).join('');
         }
         
         // ============================================
-        // CLEANUP FUNCTIONS
+        // DATA CLEANUP
         // ============================================
         
         function clearExpired() {
-            if (!confirm('Clear all expired broadcasts?')) return;
+            const expiredCount = appState.broadcasts.filter(b => 
+                b.expiry && b.expiry <= Date.now()
+            ).length;
             
-            const expiredCount = broadcasts.filter(b => b.expiry && b.expiry <= Date.now()).length;
-            broadcasts = broadcasts.filter(b => !(b.expiry && b.expiry <= Date.now()));
+            if (expiredCount === 0) {
+                showToast('No expired broadcasts to clear', 'info');
+                return;
+            }
             
-            saveToStorage();
-            displayBroadcasts();
-            updateStats();
-            
-            showNotification(`Cleared ${expiredCount} expired broadcasts`, 'success');
+            if (confirm(`Clear ${expiredCount} expired broadcasts?`)) {
+                appState.broadcasts = appState.broadcasts.filter(b => 
+                    !(b.expiry && b.expiry <= Date.now())
+                );
+                saveToStorage();
+                showToast(`Cleared ${expiredCount} expired broadcasts`, 'success');
+            }
         }
         
-        function clearDrafts() {
-            if (!confirm('Clear all drafts? This cannot be undone.')) return;
-            
-            const draftCount = drafts.length;
-            drafts = [];
-            localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(drafts));
-            
-            displayBroadcasts();
-            updateStats();
-            
-            showNotification(`Cleared ${draftCount} drafts`, 'success');
+        function showClearAllModal() {
+            openModal('clearAllModal');
         }
         
         function clearAllData() {
-            if (!confirm('WARNING: This will delete ALL data including broadcasts and drafts. Are you absolutely sure?')) return;
+            // Clear all data
+            appState.broadcasts = [];
+            appState.drafts = [];
+            appState.exports = [];
+            appState.settings = getDefaultSettings();
             
-            broadcasts = [];
-            drafts = [];
-            exports = [];
+            // Clear localStorage
+            Object.values(STORAGE_KEYS).forEach(key => {
+                localStorage.removeItem(key);
+            });
             
-            localStorage.removeItem(STORAGE_KEYS.BROADCASTS);
-            localStorage.removeItem(STORAGE_KEYS.DRAFTS);
-            localStorage.removeItem(STORAGE_KEYS.EXPORTS);
+            // Apply settings
+            applySettings();
             
-            displayBroadcasts();
+            // Update UI
+            updateDashboard();
+            displayRecentBroadcasts();
+            updateStorageInfo();
             displayExportHistory();
-            updateStats();
-            updateStorageStatus();
             
-            showNotification('All data cleared', 'success');
+            // Close modal
+            closeModal('clearAllModal');
+            
+            showToast('All data cleared', 'success');
+        }
+        
+        // ============================================
+        // SETTINGS
+        // ============================================
+        
+        function saveSettings() {
+            appState.settings = {
+                enableSounds: document.getElementById('soundToggle').checked,
+                enableAlerts: document.getElementById('alertToggle').checked,
+                darkMode: document.getElementById('darkModeToggle').checked,
+                autoSave: document.getElementById('autosaveToggle').checked,
+                autoClean: document.getElementById('autocleanToggle').checked,
+                notifications: true
+            };
+            
+            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(appState.settings));
+            applySettings();
+            showToast('Settings saved', 'success');
+        }
+        
+        function resetSettings() {
+            if (confirm('Reset all settings to defaults?')) {
+                appState.settings = getDefaultSettings();
+                localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(appState.settings));
+                applySettings();
+                showToast('Settings reset to defaults', 'success');
+            }
+        }
+        
+        // ============================================
+        // PWA & SERVICE WORKER
+        // ============================================
+        
+        function setupServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                // Create a simple service worker inline
+                const swCode = `
+                    self.addEventListener('install', (event) => {
+                        event.waitUntil(
+                            caches.open('infocast-v1').then((cache) => {
+                                return cache.addAll(['./']);
+                            })
+                        );
+                    });
+                    
+                    self.addEventListener('fetch', (event) => {
+                        event.respondWith(
+                            caches.match(event.request).then((response) => {
+                                return response || fetch(event.request);
+                            })
+                        );
+                    });
+                `;
+                
+                // Create a blob URL for the service worker
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swURL = URL.createObjectURL(swBlob);
+                
+                // Register the service worker
+                navigator.serviceWorker.register(swURL)
+                    .then(() => {
+                        console.log('Service Worker registered');
+                        document.getElementById('appStatus').textContent = 'Ready (Offline)';
+                    })
+                    .catch(err => {
+                        console.log('Service Worker registration failed:', err);
+                        document.getElementById('appStatus').textContent = 'Ready (Online)';
+                    });
+            }
+        }
+        
+        function showInstallPrompt() {
+            const prompt = document.getElementById('installPrompt');
+            prompt.classList.add('active');
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                prompt.classList.remove('active');
+            }, 10000);
+        }
+        
+        function hideInstallPrompt() {
+            document.getElementById('installPrompt').classList.remove('active');
+        }
+        
+        function installApp() {
+            if (!appState.deferredPrompt) return;
+            
+            appState.deferredPrompt.prompt();
+            
+            appState.deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    showToast('App installed successfully!', 'success');
+                }
+                appState.deferredPrompt = null;
+                hideInstallPrompt();
+            });
+        }
+        
+        // ============================================
+        // AUTO FEATURES
+        // ============================================
+        
+        function setupAutoFeatures() {
+            // Auto-save
+            if (appState.settings.autoSave) {
+                setInterval(() => {
+                    saveToStorage();
+                    showToast('Auto-saved all data', 'info', 2000);
+                }, APP_CONFIG.autoSaveInterval);
+            }
+            
+            // Auto-check expiry
+            setInterval(checkExpiredBroadcasts, APP_CONFIG.checkExpiryInterval);
         }
         
         function checkExpiredBroadcasts() {
             let hasExpired = false;
-            broadcasts.forEach(broadcast => {
+            appState.broadcasts.forEach(broadcast => {
                 if (broadcast.expiry && broadcast.expiry <= Date.now() && broadcast.status === 'active') {
                     broadcast.status = 'expired';
                     hasExpired = true;
                 }
             });
             
-            if (hasExpired) {
+            if (hasExpired && appState.settings.autoClean) {
+                appState.broadcasts = appState.broadcasts.filter(b => 
+                    !(b.expiry && b.expiry <= Date.now())
+                );
                 saveToStorage();
-                displayBroadcasts();
-                updateStats();
+                showToast('Auto-cleaned expired broadcasts', 'info');
+            } else if (hasExpired) {
+                saveToStorage();
             }
         }
         
         // ============================================
-        // HELPER FUNCTIONS
+        // UTILITY FUNCTIONS
         // ============================================
         
-        function showNotification(message, type = 'info', duration = 3000) {
-            // Create notification element
-            const notification = document.createElement('div');
+        function updateOnlineStatus() {
+            const status = navigator.onLine ? 'Online' : 'Offline';
+            document.getElementById('appStatus').textContent = `Ready (${status})`;
             
-            let bgColor, icon;
-            switch(type) {
-                case 'success':
-                    bgColor = 'var(--success-color)';
-                    icon = 'fas fa-check-circle';
-                    break;
-                case 'error':
-                    bgColor = 'var(--danger-color)';
-                    icon = 'fas fa-exclamation-circle';
-                    break;
-                default:
-                    bgColor = 'var(--primary-color)';
-                    icon = 'fas fa-info-circle';
+            if (!navigator.onLine) {
+                showToast('You are offline. All data saved locally.', 'warning', 3000);
             }
+        }
+        
+        function refreshData() {
+            loadAllData();
+            showToast('Data refreshed', 'success');
+        }
+        
+        function checkForUpdates() {
+            // Check for app updates
+            const lastUpdate = localStorage.getItem('infocast_last_update');
+            const currentDate = new Date().toDateString();
             
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${bgColor};
-                color: white;
-                padding: 15px 20px;
-                border-radius: 10px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                z-index: 1000;
-                animation: slideIn 0.3s ease-out;
-                max-width: 300px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            `;
-            notification.innerHTML = `<i class="${icon}"></i> ${message}`;
-            
-            document.body.appendChild(notification);
-            
-            // Remove after duration
-            setTimeout(() => {
-                notification.style.animation = 'slideIn 0.3s ease-out reverse';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, duration);
+            if (lastUpdate !== currentDate) {
+                localStorage.setItem('infocast_last_update', currentDate);
+                // Could check for updates here
+            }
+        }
+        
+        function showWelcomeMessage() {
+            showToast('Welcome to InfoCast! All data saved internally.', 'success', 5000);
+        }
+        
+        function getTypeIcon(type) {
+            const icons = {
+                announcement: 'bullhorn',
+                alert: 'exclamation-triangle',
+                maintenance: 'tools',
+                update: 'sync-alt',
+                news: 'newspaper',
+                meeting: 'users'
+            };
+            return icons[type] || 'bullhorn';
+        }
+        
+        function getTypeName(type) {
+            const names = {
+                announcement: 'Announcement',
+                alert: 'Alert',
+                maintenance: 'Maintenance',
+                update: 'Update',
+                news: 'News',
+                meeting: 'Meeting'
+            };
+            return names[type] || 'Announcement';
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
         
         function playAlertSound() {
+            if (!appState.settings.enableSounds) return;
+            
             try {
+                // Create a simple beep sound
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
@@ -1643,62 +2395,42 @@
             }
         }
         
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            // Remove after duration
+            setTimeout(() => {
+                toast.style.animation = 'toastIn 0.3s ease reverse';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, duration);
+        }
+        
         // ============================================
-        // DEMO DATA (for first-time users)
+        // INITIALIZE ON LOAD
         // ============================================
         
-        // Check if first time user
-        if (!localStorage.getItem(STORAGE_KEYS.BROADCASTS) && broadcasts.length === 0) {
-            // Add demo broadcasts
-            broadcasts = [
-                {
-                    id: Date.now() - 10000,
-                    title: "Welcome to InfoCast Internal Storage",
-                    type: "announcement",
-                    tags: ["welcome", "demo", "info"],
-                    urgency: "medium",
-                    message: "This is a demo broadcast. All your broadcasts are saved internally in your browser's storage.\n\nYou can:\n• Create new broadcasts\n• Add tags for organization\n• Set expiry dates\n• Export/import data\n• Search and filter broadcasts",
-                    timestamp: new Date().toISOString(),
-                    created: Date.now() - 10000,
-                    expiry: null,
-                    status: "active",
-                    views: 0,
-                    edited: false
-                },
-                {
-                    id: Date.now() - 20000,
-                    title: "System Maintenance Tomorrow",
-                    type: "maintenance",
-                    tags: ["maintenance", "system", "urgent"],
-                    urgency: "high",
-                    message: "Scheduled maintenance will occur tomorrow from 2:00 AM to 4:00 AM. All systems will be temporarily unavailable.",
-                    timestamp: new Date(Date.now() - 86400000).toISOString(),
-                    created: Date.now() - 20000,
-                    expiry: Date.now() + 86400000, // Tomorrow
-                    status: "active",
-                    views: 3,
-                    edited: false
-                },
-                {
-                    id: Date.now() - 30000,
-                    title: "New Feature: Export to CSV",
-                    type: "update",
-                    tags: ["update", "feature", "export"],
-                    urgency: "low",
-                    message: "You can now export all broadcasts to CSV format for external analysis.",
-                    timestamp: new Date(Date.now() - 172800000).toISOString(),
-                    created: Date.now() - 30000,
-                    expiry: null,
-                    status: "active",
-                    views: 5,
-                    edited: true,
-                    lastEdited: new Date().toISOString()
-                }
-            ];
-            
-            saveToStorage();
-            displayBroadcasts();
-            updateStats();
+        // Initialize when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
         }
     </script>
 </body>
